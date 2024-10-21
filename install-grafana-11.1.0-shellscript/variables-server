@@ -1,0 +1,11 @@
+[database]
+db-type:mysql
+db-host:192.168.0.40
+db-name:grafana
+db-user:grafana
+db-password:654321
+
+[users]
+allow-sign-up:false
+allow-org-create:false
+

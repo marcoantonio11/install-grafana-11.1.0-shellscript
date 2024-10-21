@@ -1,0 +1,30 @@
+#!/usr/bin/expect -f
+
+set ROOT_PASS [ exec grep root ./variables-db | cut -d: -f2 ]
+set GRAFANA_PASS [ exec grep grafana ./variables-db | cut -d: -f2 ]
+set REMOTE_IP [ exec grep remote-ip ./variables-db | cut -d: -f2 ]
+
+spawn mysql -u root -p
+expect "Enter password:"
+send -- "$ROOT_PASS\r"
+
+expect "MariaDB \\\[(none)]>"
+send -- "create database grafana character set utf8mb4 collate utf8mb4_bin;\r"
+
+expect "MariaDB \\\[(none)]>"
+send -- "create user grafana@localhost identified by '$GRAFANA_PASS';\r"
+
+expect "MariaDB \\\[(none)]>"
+send -- "grant all privileges on grafana.* to grafana@localhost;\r"
+
+expect "MariaDB \\\[(none)]>"
+send -- "grant all privileges on *.* to 'root'@'$REMOTE_IP' identified by '$ROOT_PASS' with grant option;\r"
+
+expect "MariaDB \\\[(none)]>"
+send -- "grant all privileges on grafana.* to 'grafana'@'$REMOTE_IP' identified by '$GRAFANA_PASS' with grant option;\r"
+
+expect "MariaDB \\\[(none)]>"
+send -- "flush privileges;\r"
+
+expect "MariaDB \\\[(none)]>"
+send -- "quit;\r"
